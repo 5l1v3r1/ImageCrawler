@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import json
 import requests
 from urllib.parse import urljoin
 import logging
@@ -10,7 +11,11 @@ def get_data(index):
     url = urljoin(ins_url, index)
     res = requests.post(url)
     if res.status_code == 200:
-        ret = res.json()
+        try:
+            ret = res.json()
+        except json.decoder.JSONDecodeError as e:
+            logging.error("status_code: %s/n text: %s" % (res.status_code, res.text))
+            raise e
     else:
         logging.error("status_code: %s/n text: %s" % (res.status_code, res.text))
     return ret
@@ -27,5 +32,6 @@ def parse_result(data):
 
 def get_page_by_cursor(cursor_id):
     res = get_data(cursor_id)
+    print(res)
     data = parse_result(res)
     return data
